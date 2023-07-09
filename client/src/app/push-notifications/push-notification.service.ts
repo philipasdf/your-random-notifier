@@ -4,15 +4,17 @@ import { SwPush } from '@angular/service-worker';
 
 @Injectable({ providedIn: 'root' })
 export class PushNotificationService {
-  readonly SERVER_URL = 'http://localhost:3000/subscribe';
+  readonly SAVE_SUBSCRIPTION = 'http://localhost:3000/subscribe';
   readonly NOTIFICATION_URL = 'http://localhost:3000/send-notification';
   readonly VAPID_PUBLIC_KEY = 'BPwAheySEk5TJKlLze_zG8fsKqO6rpDfHUueaRQLXnCI2JZGcxBv9BjMlhmia_e2hbuSiIH-FVzRDZqr7Cgk40E';
+
+  storedSubscription: PushSubscription | undefined = undefined;
 
   constructor(private swPush: SwPush, private http: HttpClient) {}
 
   requestSubscription() {
     if (!this.swPush.isEnabled) {
-      alert('Push notifications are not supported in your browser');
+      console.error('Push notifications are not supported in your browser');
       return;
     }
 
@@ -20,35 +22,32 @@ export class PushNotificationService {
       .requestSubscription({
         serverPublicKey: this.VAPID_PUBLIC_KEY,
       })
-      .then((subscription) => {
-        console.log('successfully subscribed', subscription);
-        //   this.sendSubscriptionToTheServer(subscription);
+      .then((subscription: PushSubscription) => {
+        console.log('successfully subscribed to SW-PushService: ' + subscription.endpoint);
+        console.log(JSON.stringify(subscription));
+        this.storedSubscription = subscription;
+        this.sendSubscriptionToTheServer(subscription);
       })
       .catch(console.error);
   }
 
   listenToNotifications() {
     this.swPush.messages.subscribe((message) => {
+      console.log('swPush got this for you: ');
       console.log(message);
-
-      // Check if the browser supports notifications
-      if ('Notification' in window && Notification.permission === 'granted') {
-        // Create a new notification
-        const title = 'New Message';
-        const options: NotificationOptions = {
-          body: 'POP UP', // The message received from the server
-        };
-        new Notification(title, options);
-      }
     });
   }
 
+  // tellServerThatISubscribedFromSwPushServer
   sendSubscriptionToTheServer(subscription: PushSubscription) {
-    console.log('sending subscription to the server...' + this.SERVER_URL, subscription);
-    this.http.post(this.SERVER_URL, subscription).subscribe();
+    this.http.post(this.SAVE_SUBSCRIPTION, subscription).subscribe();
   }
 
   sendNotification(payload: object) {
+    if (!this.storedSubscription) {
+      console.error('No subscription found');
+      return;
+    }
     console.log('sending notification to the server...', payload);
     this.http.post(this.NOTIFICATION_URL, payload).subscribe();
   }

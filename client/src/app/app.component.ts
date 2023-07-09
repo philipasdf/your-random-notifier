@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { PushNotificationService } from './push-notifications/push-notification.service';
 
 @Component({
   selector: 'app-root',
@@ -8,17 +9,15 @@ import { Component } from '@angular/core';
 export class AppComponent {
   notyText = 'any notification text';
 
-  constructor() {
-    //   // this.pushService.requestSubscription();
-    //   this.pushService.listenToNotifications();
-    //   console.log('do nothing');
+  constructor(private pushService: PushNotificationService) {
+    this.pushService.listenToNotifications();
   }
 
-  // onFormSubmit() {
-  //   this.pushService.sendNotification({ text: this.notyText });
-  // }
+  onFormSubmit() {
+    this.pushService.sendNotification({ text: this.notyText });
+  }
 
   onSubscribe() {
-    // this.pushService.requestSubscription();
+    this.pushService.requestSubscription();
   }
 }
