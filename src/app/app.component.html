@@ -1,0 +1,24 @@
+<main class="container">
+  <h1>PLAYGROUND</h1>
+
+  <article>
+    <h2>here is some data</h2>
+    <ng-container *ngIf="$data | async as data">
+      <p>{{ data.id }}</p>
+      <p>{{ data.name }}</p>
+    </ng-container>
+
+    <h2>here is some form</h2>
+    <form>
+      <input
+        name="pokemonIndex"
+        type="number"
+        min="1"
+        max="1010"
+        placeholder="any number between 1 and 1010"
+        [(ngModel)]="formInput"
+      />
+    </form>
+    <button (click)="onFormSubmit()">update data</button>
+  </article>
+</main>
