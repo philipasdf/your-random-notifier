@@ -8,8 +8,11 @@ if not already installed:
 npm install -g http-server
 
 ```
-npm run dev
+npm run watch
+npm run serve
 ```
+
+Note: do not use ng serve. We ne the built ngsw-worker.js file that is referenced in app.module.ts
 
 ### server
 
